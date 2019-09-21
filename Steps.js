@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Animated, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableWithoutFeedback, TouchableOpacity, View, Dimensions } from 'react-native';
 
 const STEP_STATUS = {
 	CURRENT: 'current',
 	FINISHED: 'finished',
 	UNFINISHED: 'unfinished',
 };
+
+const { width } = Dimensions.get('window');
 
 export default class Steps extends Component {
 	constructor(props) {
@@ -228,39 +230,62 @@ export default class Steps extends Component {
 
 	renderStepLabels = () => {
 		const { labels, direction, current, reversed } = this.props;
-		// console.log('labels ', labels)
+
 		const labelViews = labels.map((label, index) => {
 			const selectedStepLabelStyle =
 				index === current
 					? { color: this.state.configs.currentStepLabelColor }
 					: { color: this.state.configs.labelColor };
+
+			const activeLabelStyle = index > current && { color: '#ccc' };
+
 			return (
-				<TouchableWithoutFeedback
+				<TouchableOpacity
+					disabled={index > current ? true : false}
 					key={index}
 					style={styles.stepLabelItem}
 					onPress={() => this.stepPressed(index)}
 				>
-					<View style={styles.stepLabelItem}>
-						<Text
-							style={[
-								styles.stepLabel,
-								selectedStepLabelStyle,
-								{ fontSize: this.state.configs.labelSize, ...this.state.configs.labelStyle },
-							]}
-						>
-							{label.label}
-						</Text>
-						<Text
-							style={[
-								styles.stepLabel,
-								selectedStepLabelStyle,
-								{ fontSize: this.state.configs.labelSize, ...this.state.configs.subLabelStyle },
-							]}
-						>
-							{label.sublabel}
-						</Text>
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'space-between',
+						}}
+					>
+						<View>
+							<Text
+								style={[
+									styles.stepLabel,
+									selectedStepLabelStyle,
+									{ fontSize: this.state.configs.labelSize, ...this.state.configs.labelStyle },
+									activeLabelStyle,
+								]}
+							>
+								{label.label}
+							</Text>
+							<View style={{ position: 'absolute' }}>
+								<Text
+									style={[
+										styles.stepLabel,
+										selectedStepLabelStyle,
+										{
+											fontSize: this.state.configs.labelSize,
+											...this.state.configs.subLabelStyle,
+											marginTop: 25,
+											width: width - 150,
+										},
+										activeLabelStyle,
+									]}
+								>
+									{label.sublabel}
+								</Text>
+
+								<View style={{ width: '100%', marginTop: 25 }} />
+							</View>
+						</View>
+						<Text style={{ fontSize: 12, color: '#ccc' }}> > </Text>
 					</View>
-				</TouchableWithoutFeedback>
+				</TouchableOpacity>
 			);
 		});
 
@@ -425,10 +450,9 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 	},
 	stepLabelItem: {
-		flex: 1,
-		// alignItems: 'center',
+		width: width - 100,
 		justifyContent: 'center',
-		top: 10,
+		borderBottomColor: '#ccc',
 	},
 });
 
